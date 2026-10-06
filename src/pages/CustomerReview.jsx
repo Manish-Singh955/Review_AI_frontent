@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import api from '../services/api';
 import FeedbackForm from '../components/FeedbackForm';
 import ReviewEditor from '../components/ReviewEditor';
-import ReviewSuggestions from '../components/ReviewSuggestions';
 
 const experienceOptions = ['Food', 'Service', 'Staff', 'Cleanliness', 'Price', 'Atmosphere'];
 const LOW_RATING_THRESHOLD = 3;
@@ -18,8 +17,6 @@ const CustomerReview = () => {
   const [language, setLanguage] = useState('English');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [copiedMessage, setCopiedMessage] = useState('');
   const [feedbackCategory, setFeedbackCategory] = useState('service');
@@ -96,23 +93,20 @@ const CustomerReview = () => {
         language,
       });
 
-      const generatedSuggestions = response.data.suggestions || [];
-      setSuggestions(generatedSuggestions);
-      setSelectedSuggestionIndex(0);
-      setReviewText(generatedSuggestions[0] || '');
+      const generatedReview = response.data.suggestions?.[0] || '';
+      if (!generatedReview) {
+        setError('Could not create a review. Please try again.');
+        return;
+      }
+      setReviewText(generatedReview);
+      setCopiedMessage('');
       setLastGeneratedAt(now);
-      setScreen('suggestions');
+      setScreen('editor');
     } catch (err) {
       setError(err.response?.data?.message || 'Unable to generate review suggestions.');
     } finally {
       setSubmittingReview(false);
     }
-  };
-
-  const handleSelectSuggestion = (index) => {
-    setSelectedSuggestionIndex(index);
-    setReviewText(suggestions[index]);
-    setScreen('editor');
   };
 
   const handleCopy = async () => {
@@ -222,11 +216,14 @@ const CustomerReview = () => {
               </div>
 
               <div className="field-group">
-                <label>Tell us about your experience</label>
+                <h2 className="h4 mb-0">Generate Your Review with AI</h2>
+                <label htmlFor="customer-experience">Share a few words about your experience</label>
                 <textarea
-                  placeholder="Tell us about your experience..."
+                  id="customer-experience"
+                  placeholder="What stood out during your visit?"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
+                  maxLength={1000}
                 />
               </div>
 
@@ -243,15 +240,6 @@ const CustomerReview = () => {
               </button>
             </div>
           </>
-        ) : screen === 'suggestions' ? (
-          <>
-            <h2>Choose your review</h2>
-            <ReviewSuggestions
-              suggestions={suggestions}
-              selectedIndex={selectedSuggestionIndex}
-              onSelect={handleSelectSuggestion}
-            />
-          </>
         ) : screen === 'editor' ? (
           <ReviewEditor
             value={reviewText}
@@ -260,6 +248,7 @@ const CustomerReview = () => {
             onCopy={handleCopy}
             onContinue={handleGoogleClick}
             copiedMessage={copiedMessage}
+            submitting={submittingReview}
           />
         ) : screen === 'feedback' ? (
           <FeedbackForm

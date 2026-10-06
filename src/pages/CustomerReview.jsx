@@ -53,13 +53,13 @@ const CustomerReview = () => {
       return;
     }
 
-    if (!comment.trim()) {
-      setError('Please share your experience in the comment field.');
+    if (rating <= LOW_RATING_THRESHOLD) {
+      setScreen('feedback');
       return;
     }
 
-    if (rating <= LOW_RATING_THRESHOLD) {
-      setScreen('feedback');
+    if (!comment.trim() && selectedExperiences.length === 0) {
+      setError('The text box is optional. Add a few words or select an aspect so AI can use your own experience.');
       return;
     }
 
@@ -120,10 +120,15 @@ const CustomerReview = () => {
 
   const handleGoogleClick = async () => {
     try {
+      await navigator.clipboard.writeText(reviewText);
       const response = await api.post('/reviews/google-click', { qrCode });
       window.location.href = response.data.googleReviewUrl;
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not continue to Google review.');
+      if (err.response) {
+        setError(err.response.data?.message || 'Could not continue to Google review.');
+      } else {
+        setError('Could not copy your review automatically. Use Copy Review, then continue to Google.');
+      }
     }
   };
 
@@ -220,11 +225,12 @@ const CustomerReview = () => {
                 <label htmlFor="customer-experience">Share a few words about your experience</label>
                 <textarea
                   id="customer-experience"
-                  placeholder="What stood out during your visit?"
+                  placeholder="Optional: What stood out during your experience?"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   maxLength={1000}
                 />
+                <small className="text-secondary">Optional. You can also select what you liked above.</small>
               </div>
 
               <div className="field-group">

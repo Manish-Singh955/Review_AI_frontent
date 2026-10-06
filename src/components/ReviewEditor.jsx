@@ -14,11 +14,11 @@ const ReviewEditor = ({ value, onChange, onRegenerate, onCopy, onContinue, copie
           Copy Review
         </button>
         <button type="button" className="primary-button" onClick={onContinue} disabled={!value.trim() || submitting}>
-          Continue to Google Review
+          Copy & Continue to Google Review
         </button>
       </div>
 
-      <p className="ai-review-instruction">Copy your review and paste it directly into the Google Review section.</p>
+      <p className="ai-review-instruction">Your review is copied automatically. On Google, choose your star rating, paste the review, and decide whether to submit it.</p>
       {copiedMessage && <div className="success-box">{copiedMessage}</div>}
     </div>
   );

@@ -22,6 +22,7 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/review/:qrCode" element={<CustomerReview />} />
+          <Route path="/r/:qrCode" element={<CustomerReview />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />

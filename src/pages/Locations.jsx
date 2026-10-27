@@ -39,12 +39,14 @@ const Locations = () => {
     }
   };
 
-  const deactivateLocation = async (locationId) => {
+  const deleteLocation = async (locationId) => {
+    if (!window.confirm('Delete this location? Its QR code will stop working. Past ratings and feedback are kept.')) return;
+
     try {
       await api.delete(`/locations/${locationId}`);
       fetchLocations();
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not deactivate location.');
+      setError(err.response?.data?.message || 'Could not delete location.');
     }
   };
 
@@ -116,7 +118,7 @@ const Locations = () => {
                 <button className="secondary-button" onClick={() => toggleLocationStatus(location)}>
                   {location.isActive ? 'Deactivate' : 'Activate'}
                 </button>
-                <button className="danger-button" onClick={() => deactivateLocation(location._id)}>
+                <button className="danger-button" onClick={() => deleteLocation(location._id)}>
                   Delete
                 </button>
               </div>
